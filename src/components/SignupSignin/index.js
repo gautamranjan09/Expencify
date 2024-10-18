@@ -5,11 +5,13 @@ import Button from "../Button";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithPopup,
 } from "firebase/auth";
 import { toast } from "react-toastify";
-import { auth, db, doc } from "../../firebase";
+import { auth, db, doc, provider } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import { getDoc, setDoc } from "firebase/firestore";
+import { GoogleAuthProvider } from "firebase/auth/web-extension";
 
 const SignupSignIn = () => {
   const [name, setName] = useState("");
@@ -19,7 +21,6 @@ const SignupSignIn = () => {
   const [loginForm, setLoginForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
 
   function signupWithEmail() {
     setLoading(true);
@@ -38,7 +39,7 @@ const SignupSignIn = () => {
             setConfirmPassword("");
             //Create A doc with user id as the following id
             createDoc(user);
-            navigate('/dashboard');
+            navigate("/dashboard");
           })
           .catch((error) => {
             const errorCode = error.code;
@@ -65,7 +66,7 @@ const SignupSignIn = () => {
           const user = userCredential.user;
           toast.success("User Logged In!");
           setLoading(false);
-          navigate('/dashboard');
+          navigate("/dashboard");
           // ...
         })
         .catch((error) => {
@@ -80,31 +81,65 @@ const SignupSignIn = () => {
     }
   }
 
- async function createDoc() {
+  function googleAuth() {
+    setLoading(true);
+    try {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          // This gives you a Google Access Token. You can use it to access the Google API.
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential.accessToken;
+          // The signed-in user info.
+          const user = result.user;
+          toast.success("User Authenticated!");
+          createDoc(user);
+          navigate('/dashboard');
+          setLoading(false);
+          // IdP data available using getAdditionalUserInfo(result)
+          // ...
+        })
+        .catch((error) => {
+          // Handle Errors here.
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setLoading(false);
+          toast.error(errorMessage);
+          // The email of the user's account used.
+          const email = error.customData.email;
+          // The AuthCredential type that was used.
+          const credential = GoogleAuthProvider.credentialFromError(error);
+          // ...
+        });
+    } catch (e) {
+      toast.error(e.message);
+    }
+  }
+
+  async function createDoc(user) {
     // Make sure that the doc with the  user id does not exist
     setLoading(true);
 
-    if(!user) return;
+    if (!user) return;
     const userRef = doc(db, "users", user.uid);
     const userData = await getDoc(userRef);
-    if (!userData.exists()){
-        // Create a new document with the user's data
-        try{
-            await setDoc(doc(db, "users", user.uid),{
-                name: user.displayName ? user.displayName : name,
-                email:  user.email,
-                photoURL:  user.photoURL ? user.photoURL : "",
-                createdAT: new Date(),
-            });
-            setLoading(false);
-            toast.success("Doc created!");
-        } catch(e){
-            toast.error(e.message);
-            setLoading(false);
-        }
-    }  else {
-        toast.error("Doc already exists!");
+    if (!userData.exists()) {
+      // Create a new document with the user's data
+      try {
+        await setDoc(doc(db, "users", user.uid), {
+          name: user.displayName ? user.displayName : name,
+          email: user.email,
+          photoURL: user.photoURL ? user.photoURL : "",
+          createdAT: new Date(),
+        });
         setLoading(false);
+        toast.success("Doc created!");
+      } catch (e) {
+        toast.error(e.message);
+        setLoading(false);
+      }
+    } else {
+      toast.error("Doc already exists!");
+      setLoading(false);
     }
   }
 
@@ -137,6 +172,7 @@ const SignupSignIn = () => {
             />
             <p className="p-login">or</p>
             <Button
+              onClick={googleAuth}
               text={loading ? "Loading..." : "Login Using Google"}
               blue={true}
             />
@@ -189,6 +225,7 @@ const SignupSignIn = () => {
             />
             <p className="p-login">or</p>
             <Button
+              onClick={googleAuth}
               text={loading ? "Loading..." : "Signup Using Google"}
               blue={true}
             />
