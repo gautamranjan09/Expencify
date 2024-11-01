@@ -4,6 +4,7 @@ import Input from "../Input";
 import Button from "../Button";
 import {
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
 } from "firebase/auth";
@@ -20,6 +21,7 @@ const SignupSignIn = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loginForm, setLoginForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
 
   function signupWithEmail() {
@@ -93,7 +95,7 @@ const SignupSignIn = () => {
           const user = result.user;
           toast.success("User Authenticated!");
           createDoc(user);
-          navigate('/dashboard');
+          navigate("/dashboard");
           setLoading(false);
           // IdP data available using getAdditionalUserInfo(result)
           // ...
@@ -143,6 +145,56 @@ const SignupSignIn = () => {
     }
   }
 
+  async function handleForgotPassword() {
+    setLoading(true);
+    if (email) {
+      try {
+        await sendPasswordResetEmail(auth, email);
+        setLoading(false);
+        toast.success("Password reset email sent! Check  your email.");
+        setShowForgotPassword(false);
+      } catch (error) {
+        setLoading(false);
+        toast.error(error.message);
+      }
+    } else {
+      toast.error("Please enter your email address!");
+      setLoading(false);
+    }
+  }
+
+  if (showForgotPassword) {
+    return (
+      <div className="signup-wrapper">
+        <h2 className="title">
+          Reset Password -{" "}
+          <span style={{ color: "var(--theme" }}>Expencify.</span>
+        </h2>
+        <form>
+          <Input
+            type="email"
+            label={"Email"}
+            state={email}
+            setState={setEmail}
+            placeholder={"gautamranjan96@gmail.com"}
+          />
+          <Button
+            disabled={loading}
+            text={loading ? "Loading..." : "Send Reset Link"}
+            onClick={handleForgotPassword}
+          />
+          <p
+            className="p-login"
+            style={{ cursor: "pointer" }}
+            onClick={() => setShowForgotPassword(false)}
+          >
+            Back to Login
+          </p>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <>
       {loginForm ? (
@@ -165,6 +217,13 @@ const SignupSignIn = () => {
               setState={setPassword}
               placeholder={"Example@123"}
             />
+            <p
+              className="p-login"
+              style={{ cursor: "pointer", margin: "0.5rem 0", textAlign:"left" }}
+              onClick={() => setShowForgotPassword(true)}
+            >
+              Forgot Password?
+            </p>
             <Button
               disabled={loading}
               text={loading ? "Loading..." : "Login Using Email and Password"}
