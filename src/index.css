@@ -18,3 +18,20 @@ body {
 input {
   font-family: "Montserrat", sans-serif;
 }
+
+.custom-input{
+  border: 0px;
+  border-bottom: 1px solid #000;
+  border-radius: 0;
+  width:100%;
+  padding: 0.5rem 0rem;
+  margin-top: -1rem !important;
+}
+.custom-input:focus{
+  outline: none;
+  opacity: 1;
+  transition: all 0.3s;
+}
+.custom-input::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
