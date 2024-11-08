@@ -1,75 +1,14 @@
-import React from "react";
-import { Table, Tag, Space, Button, Tooltip } from "antd";
+import React, { useState } from "react";
+import { Table, Tag, Space, Button, Tooltip, Select, Radio } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
+import { Option } from "antd/es/mentions";
 
 const TransactionTable = () => {
   const transactions = useSelector((state) => state.appSlice.transactions);
-  //   {
-  //     key: '0',
-  //     type: 'expense',
-  //     tag: 'education',
-  //     amount: 500,
-  //     name: 'GAUTAM RANJAN',
-  //     date: '2024-11-08',
-  //   },
-  //   {
-  //     key: '1',
-  //     type: 'income',
-  //     tag: 'salary',
-  //     amount: 10000,
-  //     name: 'GAUTAM RANJAN',
-  //     date: '2024-11-07',
-  //   },
-  //   {
-  //     key: '2',
-  //     type: 'expense',
-  //     tag: 'office',
-  //     amount: 500,
-  //     name: 'GAUTAM RANJAN',
-  //     date: '2024-11-08',
-  //   },
-  //   {
-  //     key: '3',
-  //     type: 'expense',
-  //     tag: 'food',
-  //     amount: 700,
-  //     name: 'GAUTAM RANJAN',
-  //     date: '2024-11-08',
-  //   },
-  //   {
-  //     key: '4',
-  //     type: 'income',
-  //     tag: 'freelance',
-  //     amount: 600,
-  //     name: 'GAUTAM RANJAN',
-  //     date: '2024-11-08',
-  //   },
-  //   {
-  //     key: '5',
-  //     type: 'expense',
-  //     tag: 'education',
-  //     amount: 400,
-  //     name: 'GAUTAM RANJAN',
-  //     date: '2024-11-08',
-  //   },
-  //   {
-  //     key: '6',
-  //     type: 'expense',
-  //     tag: 'food',
-  //     amount: 100,
-  //     name: 'GAUTAM RANJAN',
-  //     date: '2024-11-07',
-  //   },
-  //   {
-  //     key: '7',
-  //     type: 'income',
-  //     tag: 'investment',
-  //     amount: 200,
-  //     name: 'GAUTAM RANJAN',
-  //     date: '2024-11-08',
-  //   },
-  // ];
+  const [sortKey, setSortKey] = useState("");
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
 
   const columns = [
     {
@@ -108,7 +47,7 @@ const TransactionTable = () => {
       title: "Date",
       dataIndex: "date",
       key: "date",
-      render: (date) => <span>{new Date(date).toLocaleDateString()}</span>,
+      //render: (date) => <span>{new Date(date).toLocaleDateString()}</span>,
     },
     {
       title: "Actions",
@@ -147,13 +86,48 @@ const TransactionTable = () => {
     // Implement delete logic (e.g., confirmation dialog and data removal)
   };
 
+  const filteredTransactions = transactions.filter(
+    (transaction) =>
+      transaction.description.toLowerCase().includes(search.toLowerCase()) &&
+      transaction.type.includes(typeFilter)
+  );
+
+  const sortedTransactions = filteredTransactions.sort((a, b) => {
+    if (sortKey === "date") return new Date(a.date) - new Date(b.date);
+    else if (sortKey === "amount") return a.amount - b.amount;
+    else return 0;
+  });
+
   return (
-    <Table
-      dataSource={transactions}
-      columns={columns}
-      bordered
-      pagination={{ pageSize: 5 }}
-    />
+    <>
+      <input
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search by description"
+      />
+      <Select
+        className="select-input"
+        value={typeFilter}
+        onChange={(value) => setTypeFilter(value)}
+        placeholder="Filter"
+        allowClear
+      >
+        <Option value="">All</Option>
+        <Option value="income">Income</Option>
+        <Option value="expense">Expense</Option>
+      </Select>
+      <Radio.Group className="input-radio" onChange={(e) => setSortKey(e.target.value)} value={sortKey}>
+        <Radio.Button value="">No Sort</Radio.Button>
+        <Radio.Button value="date">Sort by Date</Radio.Button>
+        <Radio.Button value="amount">Sort by Amount</Radio.Button>
+      </Radio.Group>
+      <Table
+        dataSource={sortedTransactions}
+        columns={columns}
+        bordered
+        pagination={{ pageSize: 5 }}
+      />
+    </>
   );
 };
 
