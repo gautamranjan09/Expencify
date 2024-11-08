@@ -2,10 +2,10 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const appSlice = createSlice({
     name: 'appSlice',
-    initialState: {transaction:null, user: null},
+    initialState: {transactions:[], user: null},
     reducers:{
-        setTransaction : (state, action)=>{
-            state.transaction = action.payload;
+        setTransactions : (state, action)=>{
+            state.transactions = action.payload;
         },
         setUser : (state, action)=>{
             state.user = action.payload;
@@ -13,5 +13,5 @@ const appSlice = createSlice({
     }
 });
 
-export const {setTransaction, setUser} = appSlice.actions;
+export const {setTransactions, setUser} = appSlice.actions;
 export default appSlice.reducer;

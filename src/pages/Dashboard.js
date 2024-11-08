@@ -8,12 +8,14 @@ import moment from "moment";
 import { toast } from "react-toastify";
 import { addDoc, collection, onSnapshot, query } from "firebase/firestore";
 import { auth, db } from "../firebase";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setTransactions } from "../redux/appSlice";
 
 const Dashboard = () => {
   const user = useSelector((state) => state.appSlice.user);
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const [transactions, setTransactions] = useState(null);
+ // const [transactions, setTransactions] = useState(null);
   const [isExpenseModalVisible, setIsExpenseModalVisible] = useState(false);
   const [isIncomeModalVisible, setIsIncomeModalVisible] = useState(false);
 
@@ -66,16 +68,17 @@ const Dashboard = () => {
         ...doc.data(),
       }));
 
-      setTransactions(transactionsArray);
+      dispatch(setTransactions(transactionsArray));
+      //setTransactions(transactionsArray);
       setLoading(false);
-      console.log("tramsactions array", transactionsArray, transactions);
+      console.log("tramsactions array", transactionsArray);
       toast.success("Transactions Fetched!")
     });
 
     return () => {
       unsubscribe();
     }; // Cleanup on unmount
-  },[]);
+  },[user]);
 
   return (
     <div>
