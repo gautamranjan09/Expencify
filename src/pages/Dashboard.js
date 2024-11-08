@@ -10,6 +10,7 @@ import { addDoc, collection, onSnapshot, query } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { setTransactions } from "../redux/appSlice";
+import TransactionTable from "../components/TransactionTable";
 
 const Dashboard = () => {
   const user = useSelector((state) => state.appSlice.user);
@@ -41,7 +42,7 @@ const Dashboard = () => {
       date: moment(value.date).format("YYYY-MM-DD"),
       amount: parseFloat(value.amount),
       tag: value.tag,
-      name: value.name,
+      description: value.description,
     };
     addTransaction(newTransaction);
   };
@@ -66,6 +67,7 @@ const Dashboard = () => {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const transactionsArray = snapshot.docs.map((doc) => ({
         ...doc.data(),
+        key: doc.id,
       }));
 
       dispatch(setTransactions(transactionsArray));
@@ -101,6 +103,7 @@ const Dashboard = () => {
             handleIncomeCancel={handleIncomeCancel}
             onFinish={onFinish}
           />
+          <TransactionTable/>
         </>
       )}
     </div>

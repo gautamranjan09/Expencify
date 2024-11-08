@@ -22,12 +22,12 @@ function AddIncomeModal({isIncomeModalVisible, handleIncomeCancel, onFinish}) {
       >
         <Form.Item
           style={{ fontWeight: 600 }}
-          label="Name"
-          name="name"
+          label="Description"
+          name="description"
           rules={[
             {
               required: true,
-              message: "Please input the name of the transaction!",
+              message: "Please input the Description of the transaction!",
             },
           ]}
         >

@@ -21,7 +21,7 @@ const Cards = ({ showExpenseModal, showIncomeModal }) => {
 
     setIncome(incomeTotal);
     setExpense(expenseTotal);
-  },[]);
+  },[transactions]);
 
 
   return (
