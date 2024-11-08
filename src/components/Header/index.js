@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { signOut } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/appSlice";
+import userImg from "../../assets/user.svg";
 
 const Header = () => {
   const [user, loading] = useAuthState(auth);
@@ -51,9 +52,12 @@ const Header = () => {
     <div className="navbar">
       <p className="logo">Expencify.</p>
       {user && (
-        <p onClick={logoutFnc} className="logo link">
-          Logout
-        </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <img src={user?.photoURL ? user?.photoURL : userImg} style={{borderRadius: "50%", height:"1.5rem", width:"1.5rem"}}/>
+          <p onClick={logoutFnc} className="logo link">
+            Logout
+          </p>
+        </div>
       )}
     </div>
   );

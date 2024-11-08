@@ -16,7 +16,6 @@ const Dashboard = () => {
   const user = useSelector((state) => state.appSlice.user);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
- // const [transactions, setTransactions] = useState(null);
   const [isExpenseModalVisible, setIsExpenseModalVisible] = useState(false);
   const [isIncomeModalVisible, setIsIncomeModalVisible] = useState(false);
 
@@ -39,7 +38,7 @@ const Dashboard = () => {
   const onFinish = (value, type) => {
     const newTransaction = {
       type: type,
-      date: moment(value.date).format("YYYY-MM-DD"),
+      date: value.date.format("YYYY-MM-DD"),
       amount: parseFloat(value.amount),
       tag: value.tag,
       description: value.description,
