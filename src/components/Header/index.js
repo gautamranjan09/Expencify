@@ -16,9 +16,20 @@ const Header = () => {
   useEffect(() => {
     if (user) {
       navigate("/dashboard");
-      dispatch(setUser(user));
+      dispatch(setUser(transformUser(user)));
     }
   }, [user, loading]);
+
+  // Example function to transform the user object
+  const transformUser = (user) => {
+    return {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      // Add other properties as needed, but avoid non-serializable ones like methods or nested objects
+    };
+  };
 
   function logoutFnc() {
     try {
@@ -26,7 +37,7 @@ const Header = () => {
         .then(() => {
           // Sign-out successful.
           toast.success("Logged out successfully!");
-          navigate('/');
+          navigate("/");
         })
         .catch((error) => {
           // An error happened.
