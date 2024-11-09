@@ -5,9 +5,11 @@ import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { Option } from "antd/es/mentions";
 import searchImg from "../../assets/search.svg";
+import { parse, unparse } from "papaparse";
+import { toast } from "react-toastify";
 
-const TransactionTable = () => {
-  const transactions = useSelector((state) => state.appSlice.transactions);
+const TransactionTable = ({ addTransaction }) => {
+  const transactions = useSelector((state) => state.appSlice.transactions) || [];
   const [sortKey, setSortKey] = useState("");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -17,7 +19,7 @@ const TransactionTable = () => {
       title: "Description",
       dataIndex: "description",
       key: "name",
-      render: (text) => <strong>{text}</strong>,
+      render: (text) => <strong>{text || "No description"}</strong>,
     },
     {
       title: "Type",
@@ -25,7 +27,7 @@ const TransactionTable = () => {
       key: "type",
       render: (type) => (
         <Tag color={type === "income" ? "green" : "volcano"}>
-          {type.toUpperCase()}
+          {(type || "unknown").toUpperCase()}
         </Tag>
       ),
     },
@@ -33,7 +35,7 @@ const TransactionTable = () => {
       title: "Tag",
       dataIndex: "tag",
       key: "tag",
-      render: (tag) => <Tag color="geekblue">{tag.toUpperCase()}</Tag>,
+      render: (tag) => <Tag color="geekblue">{(tag || "untagged").toUpperCase()}</Tag>,
     },
     {
       title: "Amount (₹)",
@@ -41,7 +43,7 @@ const TransactionTable = () => {
       key: "amount",
       render: (amount, record) => (
         <span style={{ color: record.type === "income" ? "green" : "red" }}>
-          ₹ {amount}
+          ₹ {amount || 0}
         </span>
       ),
     },
@@ -49,7 +51,6 @@ const TransactionTable = () => {
       title: "Date",
       dataIndex: "date",
       key: "date",
-      //render: (date) => <span>{new Date(date).toLocaleDateString()}</span>,
     },
     {
       title: "Actions",
@@ -80,25 +81,123 @@ const TransactionTable = () => {
 
   const handleEdit = (key) => {
     console.log(`Edit action triggered for key: ${key}`);
-    // Implement edit logic (e.g., open a modal with a form)
   };
 
   const handleDelete = (key) => {
     console.log(`Delete action triggered for key: ${key}`);
-    // Implement delete logic (e.g., confirmation dialog and data removal)
   };
 
-  const filteredTransactions = transactions.filter(
-    (transaction) =>
-      transaction.description.toLowerCase().includes(search.toLowerCase()) &&
-      transaction.type.includes(typeFilter)
-  );
+  const filteredTransactions = transactions.filter((transaction) => {
+    if (!transaction) return false;
+    
+    const descriptionMatch = !search || 
+      (transaction.description && 
+       transaction.description.toLowerCase().includes(search.toLowerCase()));
+    
+    const typeMatch = !typeFilter || 
+      (transaction.type && 
+       transaction.type.includes(typeFilter));
+    
+    return descriptionMatch && typeMatch;
+  });
 
   const sortedTransactions = filteredTransactions.sort((a, b) => {
-    if (sortKey === "date") return new Date(a.date) - new Date(b.date);
-    else if (sortKey === "amount") return a.amount - b.amount;
-    else return 0;
+    if (!a || !b) return 0;
+    
+    if (sortKey === "date") {
+      return new Date(a.date || 0) - new Date(b.date || 0);
+    } else if (sortKey === "amount") {
+      return (a.amount || 0) - (b.amount || 0);
+    }
+    return 0;
   });
+
+  function exportCSV() {
+    const csvData = transactions.map(t => ({
+      type: t?.type || '',
+      date: t?.date || '',
+      tag: t?.tag || '',
+      description: t?.description || '',
+      amount: t?.amount || 0
+    }));
+
+    var csv = unparse({
+      fields: ["type", "date", "tag", "description", "amount"],
+      data: csvData
+    });
+    var data = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    var csvURL = window.URL.createObjectURL(data);
+    var tempLink = document.createElement("a");
+    tempLink.href = csvURL;
+    tempLink.setAttribute("download", "transactions.csv");
+    tempLink.click();
+    window.URL.revokeObjectURL(csvURL);
+  }
+
+  function importFromCsv(event) {
+    event.preventDefault();
+    try {
+      const file = event.target.files[0];
+      if (!file) {
+        toast.error("Please select a file");
+        return;
+      }
+
+      // Show initial loading toast
+      const loadingToast = toast.loading("Importing transactions...");
+
+      parse(file, {
+        header: true,
+        complete: async function(results) {
+          try {
+            const totalTransactions = results.data.length;
+            let successCount = 0;
+
+            for (const transaction of results.data) {
+              if (!transaction.type || !transaction.amount) continue;
+              
+              const newTransaction = {
+                ...transaction,
+                amount: parseFloat(transaction.amount) || 0,
+                date: transaction.date || new Date().toISOString().split('T')[0],
+                description: transaction.description || '',
+                tag: transaction.tag || 'others'
+              };
+
+              await addTransaction(newTransaction, true);
+              successCount++;
+            }
+
+            // Update the loading toast with success message
+            toast.update(loadingToast, {
+              render: `Successfully imported ${successCount} of ${totalTransactions} transactions`,
+              type: "success",
+              isLoading: false,
+              autoClose: 3000
+            });
+
+          } catch (error) {
+            // Update the loading toast with error message
+            toast.update(loadingToast, {
+              render: "Error importing transactions: " + error.message,
+              type: "error",
+              isLoading: false,
+              autoClose: 3000
+            });
+          }
+        },
+        error: function(error) {
+          toast.error("Error reading CSV file: " + error.message);
+        }
+      });
+      
+      // Reset file input
+      event.target.value = null;
+      
+    } catch (e) {
+      toast.error("Error importing file: " + e.message);
+    }
+  }
 
   return (
     <div style={{ width: "95%", padding: "0rem 2rem" }}>
@@ -112,7 +211,7 @@ const TransactionTable = () => {
         }}
       >
         <div className="input-flex">
-          <img src={searchImg} width="16" />
+          <img src={searchImg} width="16" alt="search" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -160,17 +259,17 @@ const TransactionTable = () => {
               width: "400px",
             }}
           >
-            <button className="btn" >
+            <button className="btn" onClick={exportCSV}>
               Export to CSV
             </button>
-            <label for="file-csv" className="btn btn-blue">
+            <label htmlFor="file-csv" className="btn btn-blue">
               Import from CSV
             </label>
             <input
-              // onChange={importFromCsv}
+              onChange={importFromCsv}
               id="file-csv"
               type="file"
-              //accept=".csv"
+              accept=".csv"
               required
               style={{ display: "none" }}
             />

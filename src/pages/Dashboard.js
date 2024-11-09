@@ -9,11 +9,12 @@ import { toast } from "react-toastify";
 import { addDoc, collection, onSnapshot, query } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { useDispatch, useSelector } from "react-redux";
-import { setTransactions } from "../redux/appSlice";
+import { setInitialFetchDone, setTransactions } from "../redux/appSlice";
 import TransactionTable from "../components/TransactionTable";
 
 const Dashboard = () => {
   const user = useSelector((state) => state.appSlice.user);
+  const isInitialFetchDone = useSelector((state) => state.appSlice.isInitialFetchDone);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [isExpenseModalVisible, setIsExpenseModalVisible] = useState(false);
@@ -46,17 +47,17 @@ const Dashboard = () => {
     addTransaction(newTransaction);
   };
 
-  async function addTransaction(transaction) {
+  async function addTransaction(transaction, many) {
     try {
       const docRef = await addDoc(
         collection(db, `users/${user?.uid}/transactions`),
         transaction
       );
       console.log("Document written with ID: ", docRef.id);
-      toast.success("Transaction Added!");
+      if (!many) toast.success("Transaction Added!");
     } catch (e) {
       console.log("error adding document:", e);
-      toast.error("Couldn't add transaction");
+      if (!many) toast.error("Couldn't add transaction");
     }
   }
 
@@ -73,13 +74,17 @@ const Dashboard = () => {
       //setTransactions(transactionsArray);
       setLoading(false);
       console.log("tramsactions array", transactionsArray);
-      toast.success("Transactions Fetched!")
+       // Only show toast on initial fetch
+       if (!isInitialFetchDone) {
+        toast.success("Transactions Loaded Successfully!");
+        dispatch(setInitialFetchDone(true));
+      }
     });
 
     return () => {
       unsubscribe();
     }; // Cleanup on unmount
-  },[user]);
+  },[user?.uid, dispatch, isInitialFetchDone]);
 
   return (
     <div>
@@ -102,7 +107,7 @@ const Dashboard = () => {
             handleIncomeCancel={handleIncomeCancel}
             onFinish={onFinish}
           />
-          <TransactionTable/>
+          <TransactionTable addTransaction={addTransaction}/>
         </>
       )}
     </div>
