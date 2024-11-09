@@ -37,5 +37,67 @@
     box-shadow: 0px 0px 30px 8px rgba(227, 227, 227, 0.75);
     border-radius: 0.95rem !important;
     padding: 1rem 3rem;
-    margin-bottom: 4rem;
+    margin-bottom: 1rem;
   }
+/* Add these styles to your existing style.css */
+
+/* Table container responsiveness */
+.my-table {
+  width: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive padding adjustments */
+@media screen and (max-width: 768px) {
+  .my-table {
+    padding: 1rem;
+  }
+  
+  /* Adjust the parent container padding */
+  div[style*="width: 95%"] {
+    padding: 0 1rem !important;
+  }
+
+  /* Make the filter controls stack on mobile */
+  div[style*="display: flex"][style*="justify-content: space-between"] {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Make the search input take full width */
+  .input-flex {
+    width: 100%;
+  }
+
+  /* Make the select filter take full width */
+  .select-input {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  /* Adjust the radio button group layout */
+  .input-radio {
+    width: 320px;
+    flex-wrap: nowrap;
+  }
+
+  /* Make export/import buttons more compact */
+  div[style*="width: 400px"] {
+    width: 100% !important;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    flex: 1 1 auto;
+    min-width: 140px;
+    text-align: center;
+  }
+}
+
+/* Additional responsive adjustments for very small screens */
+@media screen and (max-width: 480px) {
+  .my-table h2 {
+    font-size: 1.5rem;
+  }
+}

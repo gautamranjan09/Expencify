@@ -5,3 +5,35 @@
   width:100vw;
   height: 90vh;
 }
+
+.charts-wrapper{
+  display: flex;
+  flex-wrap: wrap;
+  width: 90%;
+  justify-content: space-between;
+  height: auto;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow);
+  margin: 2rem;
+  gap: 2rem;
+}
+
+.dashboard-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.card-wrapper{
+  display: flex;
+  flex-wrap: wrap;
+  width: 90%;
+  justify-content: space-between;
+  height: auto;
+  padding: 0.7rem;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow);
+  margin: 2rem;
+  gap: 2rem;
+}

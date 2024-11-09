@@ -200,7 +200,7 @@ const TransactionTable = ({ addTransaction }) => {
   }
 
   return (
-    <div style={{ width: "95%", padding: "0rem 2rem" }}>
+    <div  style={{ width: "95%", padding: "0rem 2rem" }}>
       <div
         style={{
           display: "flex",
@@ -208,6 +208,7 @@ const TransactionTable = ({ addTransaction }) => {
           gap: "1rem",
           alignItems: "center",
           marginBottom: "1rem",
+          marginTop: "1rem",
         }}
       >
         <div className="input-flex">
@@ -254,9 +255,9 @@ const TransactionTable = ({ addTransaction }) => {
           <div
             style={{
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "space-between",
               gap: "1rem",
-              width: "400px",
+              width: "250px",
             }}
           >
             <button className="btn" onClick={exportCSV}>
@@ -280,6 +281,8 @@ const TransactionTable = ({ addTransaction }) => {
           columns={columns}
           bordered
           pagination={{ pageSize: 5 }}
+          scroll={{ x: "max-content" }}
+
         />
       </div>
     </div>

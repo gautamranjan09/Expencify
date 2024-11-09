@@ -1,0 +1,68 @@
+/* ChartComponent.css */
+.chart-outer-container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.chart-container {
+    flex: 1;
+    padding: 24px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+.chart-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.chart-inner-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+@media screen and (max-width: 768px) {
+    .chart-outer-container {
+        flex-direction: column;
+    }
+    .chart-container {
+        padding: 16px;
+        margin: 10px 0;
+    }
+
+    .chart-title {
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+
+    /* Adjust chart height for mobile */
+    :global(.ant-charts-line) {
+        height: 300px !important;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .chart-outer-container {
+        flex-direction: column;
+    }
+    .chart-container {
+        padding: 12px;
+        margin: 8px 0;
+    }
+
+    .chart-title {
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    /* Further reduce chart height for smaller screens */
+    :global(.ant-charts-line) {
+        height: 250px !important;
+    }
+}

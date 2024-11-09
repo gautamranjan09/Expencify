@@ -11,10 +11,15 @@ import { auth, db } from "../firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { setInitialFetchDone, setTransactions } from "../redux/appSlice";
 import TransactionTable from "../components/TransactionTable";
+import ChartComponent from "../components/Charts";
+import NoTransactions from "../components/NoTransactions";
 
 const Dashboard = () => {
   const user = useSelector((state) => state.appSlice.user);
-  const isInitialFetchDone = useSelector((state) => state.appSlice.isInitialFetchDone);
+  const transactions = useSelector((state) => state.appSlice.transactions) || [];
+  const isInitialFetchDone = useSelector(
+    (state) => state.appSlice.isInitialFetchDone
+  );
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [isExpenseModalVisible, setIsExpenseModalVisible] = useState(false);
@@ -61,7 +66,7 @@ const Dashboard = () => {
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     setLoading(true);
     const q = query(collection(db, `users/${user?.uid}/transactions`));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -74,8 +79,8 @@ const Dashboard = () => {
       //setTransactions(transactionsArray);
       setLoading(false);
       console.log("tramsactions array", transactionsArray);
-       // Only show toast on initial fetch
-       if (!isInitialFetchDone) {
+      // Only show toast on initial fetch
+      if (!isInitialFetchDone) {
         toast.success("Transactions Loaded Successfully!");
         dispatch(setInitialFetchDone(true));
       }
@@ -84,19 +89,37 @@ const Dashboard = () => {
     return () => {
       unsubscribe();
     }; // Cleanup on unmount
-  },[user?.uid, dispatch, isInitialFetchDone]);
+  }, [user?.uid, dispatch, isInitialFetchDone]);
+
+  const sortedTransactions = transactions
+    ? [...transactions].sort((a, b) => {
+        if (!a || !b) return 0;
+        return new Date(a.date || 0) - new Date(b.date || 0);
+      })
+    : [];
 
   return (
-    <div>
-      <Header />
+    <>
+    <Header />
+    <div className="dashboard-container">
+      
       {loading ? (
         <p>Loading...</p>
       ) : (
         <>
+        <div className="card-wrapper">
           <Cards
             showExpenseModal={showExpenseModal}
             showIncomeModal={showIncomeModal}
           />
+          </div>
+          <div className="charts-wrapper">
+            {transactions.length != 0 ? (
+              <ChartComponent sortedTransactions={sortedTransactions} />
+            ) : (
+              <NoTransactions />
+            )}
+          </div>
           <AddExpenseModal
             isExpenseModalVisible={isExpenseModalVisible}
             handleExpenseCancel={handleExpenseCancel}
@@ -107,10 +130,13 @@ const Dashboard = () => {
             handleIncomeCancel={handleIncomeCancel}
             onFinish={onFinish}
           />
-          <TransactionTable addTransaction={addTransaction}/>
+          <div className="charts-wrapper">
+          <TransactionTable addTransaction={addTransaction} />
+          </div>
         </>
       )}
     </div>
+    </>
   );
 };
 
