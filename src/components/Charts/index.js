@@ -1,8 +1,27 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Line, Pie } from "@ant-design/charts";
 import "./style.css";
+import { Splitter } from "antd";
 
 const ChartComponent = ({ sortedTransactions }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Handle responsive behavior
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    // Initial check
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Memoize the balance calculations to prevent unnecessary recalculations
   const balanceData = useMemo(() => {
     // Create a deep copy and sort by date
@@ -29,7 +48,7 @@ const ChartComponent = ({ sortedTransactions }) => {
     if (transaction.type === "expense")
       return { tag: transaction.tag, amount: transaction.amount };
   });
-  
+
   const finalSpendings = spendingData.reduce((acc, current) => {
     if (!acc[current.tag]) {
       acc[current.tag] = { tag: current.tag, amount: current.amount };
@@ -38,22 +57,24 @@ const ChartComponent = ({ sortedTransactions }) => {
     }
     return acc;
   }, {});
-  
+
   const finalSpendingsArray = Object.values(finalSpendings);
-  
+
   // Step 1: Calculate total expense
-  const totalExpense = finalSpendingsArray.reduce((sum, item) => sum + item.amount, 0);
-  
+  const totalExpense = finalSpendingsArray.reduce(
+    (sum, item) => sum + item.amount,
+    0
+  );
+
   // Step 2: Add percentage to each item in finalSpendingsArray
-  const finalSpendingsWithPercent = finalSpendingsArray.map(item => {
+  const finalSpendingsWithPercent = finalSpendingsArray.map((item) => {
     const percent = ((item.amount / totalExpense) * 100).toFixed(2);
     return {
       tag: item.tag.charAt(0).toUpperCase() + item.tag.slice(1),
       amount: item.amount,
-      percent: `${percent}%`
+      percent: `${percent}%`,
     };
   });
-  
 
   const config = {
     data: balanceData,
@@ -153,12 +174,14 @@ const ChartComponent = ({ sortedTransactions }) => {
   const spendingConfig = {
     data: finalSpendingsWithPercent,
     angleField: "amount",
+    height: 400,
+    width:400,
     colorField: "tag",
     label: {
       text: ({ tag, percent }) => {
         return `${tag}: ${percent}`;
       },
-      fill: '#fff',
+      fill: "#fff",
       fontSize: 15,
     },
     legend: {
@@ -170,20 +193,49 @@ const ChartComponent = ({ sortedTransactions }) => {
     },
   };
 
+  if (isMobile) {
+    return (
+      <div className="chart-outer-container">
+        <div className="chart-container">
+          <h2 className="chart-title">Balance Over Time</h2>
+          <div className="chart-inner-container">
+            <Line {...config} />
+          </div>
+        </div>
+        <div className="chart-container">
+          <h2 className="chart-title">Your Spendings</h2>
+          <div className="chart-inner-container">
+            <Pie {...spendingConfig} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="chart-outer-container">
-      <div className="chart-container">
-        <h2 className="chart-title">Balance Over Time</h2>
-        <div className="chart-inner-container">
-          <Line {...config} />
-        </div>
-      </div>
-      <div className="chart-container">
-        <h2 className="chart-title">Your Spendings</h2>
-        <div className="chart-inner-container">
-          <Pie {...spendingConfig} />
-        </div>
-      </div>
+      <Splitter
+        style={{
+          height: 580,
+        }}
+      >
+        <Splitter.Panel >
+          <div className="chart-container">
+            <h2 className="chart-title">Balance Over Time</h2>
+            <div className="chart-inner-container">
+              <Line {...config} />
+            </div>
+          </div>
+        </Splitter.Panel>
+        <Splitter.Panel defaultSize="40%">
+          <div className="chart-container">
+            <h2 className="chart-title">Your Spendings</h2>
+            <div className="chart-inner-container">
+              <Pie {...spendingConfig} />
+            </div>
+          </div>
+        </Splitter.Panel>
+      </Splitter>
     </div>
   );
 };

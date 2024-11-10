@@ -1,12 +1,12 @@
-.wrapper{
+.wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  width:100vw;
+  width: 100vw;
   height: 90vh;
 }
 
-.charts-wrapper{
+.charts-wrapper {
   display: flex;
   flex-wrap: wrap;
   width: 90%;
@@ -19,13 +19,13 @@
   gap: 2rem;
 }
 
-.dashboard-container{
+.dashboard-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-.card-wrapper{
+.card-wrapper {
   display: flex;
   flex-wrap: wrap;
   width: 90%;
@@ -38,10 +38,15 @@
   gap: 2rem;
 }
 
-.loader-wrapper{
+.loader-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100vw;
   height: 90vh;
+}
+
+.custom-modal .ant-modal-title {
+  font-size: 24px; /* Adjust size as needed */
+  font-weight: 600; /* Optional: Adjust weight for emphasis */
 }

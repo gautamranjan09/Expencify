@@ -24,14 +24,36 @@ input {
   border-bottom: 1px solid #000;
   border-radius: 0;
   width:100%;
-  padding: 0.5rem 0rem;
+  padding: 0rem;
   margin-top: -1rem !important;
 }
 .custom-input:focus{
-  outline: none;
+  outline: none !important;
   opacity: 1;
   transition: all 0.3s;
 }
 .custom-input::placeholder {
   color: rgba(0, 0, 0, 0.5);
+}
+
+/* #description{
+  padding: 0rem;
+  margin: 0;
+} */
+.select-input-2 > div {
+  border-width: 0px !important;
+  border-bottom-width: 1px !important;
+  border-radius: 0 !important;
+  border-color: #000 !important;
+}
+
+.select-input-2.ant-select-focused .ant-select-selector {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.ant-form-item-has-error .custom-input {
+  border: none !important; /* Remove all borders */
+  border-bottom: 2px solid red !important; /* Add only the bottom border in red */
+  box-shadow: none !important; /* Remove any shadow */
 }

@@ -58,6 +58,8 @@ const Dashboard = () => {
         transaction
       );
       console.log("Document written with ID: ", docRef.id);
+      setIsExpenseModalVisible(false);
+      setIsIncomeModalVisible(false);
       if (!many) toast.success("Transaction Added!");
     } catch (e) {
       console.log("error adding document:", e);

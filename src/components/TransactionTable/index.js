@@ -9,6 +9,7 @@ import { parse, unparse } from "papaparse";
 import { toast } from "react-toastify";
 import { deleteDoc } from "firebase/firestore";
 import { db, doc } from "../../firebase";
+import EditTransactionModal from "../Modals/EditTransactionModal ";
 
 const TransactionTable = ({ addTransaction }) => {
   const user = useSelector((state) => state.appSlice.user);
@@ -16,6 +17,8 @@ const TransactionTable = ({ addTransaction }) => {
   const [sortKey, setSortKey] = useState("");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
 
   const columns = [
     {
@@ -65,7 +68,7 @@ const TransactionTable = ({ addTransaction }) => {
               type="primary"
               shape="circle"
               icon={<EditOutlined />}
-              onClick={() => handleEdit(record.key)}
+              onClick={() => handleEdit(record)}
             />
           </Tooltip>
           <Tooltip title="Delete">
@@ -82,8 +85,17 @@ const TransactionTable = ({ addTransaction }) => {
     },
   ];
 
-  const handleEdit = (key) => {
-    console.log(`Edit action triggered for key: ${key}`);
+  const handleEdit = (record) => {
+    setEditingTransaction(record);
+    setIsEditModalVisible(true);
+  };
+
+  const handleModalClose = (wasUpdated = false) => {
+    setIsEditModalVisible(false);
+    setEditingTransaction(null);
+    if (wasUpdated) {
+      // Optionally refresh your transactions data here if needed
+    }
   };
 
   const handleDelete = async (key, transactionDetails) => {
@@ -299,6 +311,12 @@ const TransactionTable = ({ addTransaction }) => {
 
         />
       </div>
+      <EditTransactionModal 
+        isVisible={isEditModalVisible}
+        onClose={handleModalClose}
+        transaction={editingTransaction}
+        userId={user?.uid}
+      />
     </div>
   );
 };
