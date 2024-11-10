@@ -13,6 +13,7 @@ import { setInitialFetchDone, setTransactions } from "../redux/appSlice";
 import TransactionTable from "../components/TransactionTable";
 import ChartComponent from "../components/Charts";
 import NoTransactions from "../components/NoTransactions";
+import { DotLoader } from "react-spinners";
 
 const Dashboard = () => {
   const user = useSelector((state) => state.appSlice.user);
@@ -104,7 +105,9 @@ const Dashboard = () => {
     <div className="dashboard-container">
       
       {loading ? (
-        <p>Loading...</p>
+        <div className="loader-wrapper">
+        <DotLoader color="#2970ff" />
+        </div>
       ) : (
         <>
         <div className="card-wrapper">
