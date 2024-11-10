@@ -7,8 +7,11 @@ import { Option } from "antd/es/mentions";
 import searchImg from "../../assets/search.svg";
 import { parse, unparse } from "papaparse";
 import { toast } from "react-toastify";
+import { deleteDoc } from "firebase/firestore";
+import { db, doc } from "../../firebase";
 
 const TransactionTable = ({ addTransaction }) => {
+  const user = useSelector((state) => state.appSlice.user);
   const transactions = useSelector((state) => state.appSlice.transactions) || [];
   const [sortKey, setSortKey] = useState("");
   const [search, setSearch] = useState("");
@@ -71,7 +74,7 @@ const TransactionTable = ({ addTransaction }) => {
               color="danger"
               shape="circle"
               icon={<DeleteOutlined />}
-              onClick={() => handleDelete(record.key)}
+              onClick={() => handleDelete(record.key, record)}
             />
           </Tooltip>
         </Space>
@@ -83,8 +86,19 @@ const TransactionTable = ({ addTransaction }) => {
     console.log(`Edit action triggered for key: ${key}`);
   };
 
-  const handleDelete = (key) => {
-    console.log(`Delete action triggered for key: ${key}`);
+  const handleDelete = async (key, transactionDetails) => {
+    const { description, type, tag, amount, date } = transactionDetails;
+  
+    try {
+      console.log(`Delete action triggered for key: ${key}`);
+      await deleteDoc(doc(db, `users/${user?.uid}/transactions`, key));
+      toast.success(`Transaction deleted successfully: 
+        ${type} - ${description} ₹${amount} on ${new Date(date).toLocaleDateString()}`);
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      toast.error(`Failed to delete the transaction: 
+        ${type} - ${description} [${tag}] ₹${amount} on ${new Date(date).toLocaleDateString()}`);
+    }
   };
 
   const filteredTransactions = transactions.filter((transaction) => {

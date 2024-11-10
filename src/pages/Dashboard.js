@@ -18,9 +18,7 @@ import { DotLoader } from "react-spinners";
 const Dashboard = () => {
   const user = useSelector((state) => state.appSlice.user);
   const transactions = useSelector((state) => state.appSlice.transactions) || [];
-  const isInitialFetchDone = useSelector(
-    (state) => state.appSlice.isInitialFetchDone
-  );
+  const isInitialFetchDone = useSelector((state) => state.appSlice.isInitialFetchDone);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [isExpenseModalVisible, setIsExpenseModalVisible] = useState(false);
@@ -79,7 +77,6 @@ const Dashboard = () => {
       dispatch(setTransactions(transactionsArray));
       //setTransactions(transactionsArray);
       setLoading(false);
-      console.log("tramsactions array", transactionsArray);
       // Only show toast on initial fetch
       if (!isInitialFetchDone) {
         toast.success("Transactions Loaded Successfully!");

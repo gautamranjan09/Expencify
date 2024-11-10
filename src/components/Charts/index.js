@@ -29,7 +29,6 @@ const ChartComponent = ({ sortedTransactions }) => {
     if (transaction.type === "expense")
       return { tag: transaction.tag, amount: transaction.amount };
   });
-  console.log(spendingData);
   
   const finalSpendings = spendingData.reduce((acc, current) => {
     if (!acc[current.tag]) {
@@ -41,7 +40,6 @@ const ChartComponent = ({ sortedTransactions }) => {
   }, {});
   
   const finalSpendingsArray = Object.values(finalSpendings);
-  console.log(finalSpendingsArray);
   
   // Step 1: Calculate total expense
   const totalExpense = finalSpendingsArray.reduce((sum, item) => sum + item.amount, 0);
@@ -50,13 +48,11 @@ const ChartComponent = ({ sortedTransactions }) => {
   const finalSpendingsWithPercent = finalSpendingsArray.map(item => {
     const percent = ((item.amount / totalExpense) * 100).toFixed(2);
     return {
-      tag: item.tag,
+      tag: item.tag.charAt(0).toUpperCase() + item.tag.slice(1),
       amount: item.amount,
       percent: `${percent}%`
     };
   });
-  
-  console.log("Final Spendings with Percent:", finalSpendingsWithPercent);
   
 
   const config = {
@@ -159,16 +155,16 @@ const ChartComponent = ({ sortedTransactions }) => {
     angleField: "amount",
     colorField: "tag",
     label: {
-        text: (d) => `${d.tag}\n ${d.percent}`,
-        position: 'outside',
-      style: {
-        fontWeight: "bold",
+      text: ({ tag, percent }) => {
+        return `${tag}: ${percent}`;
       },
+      fill: '#fff',
+      fontSize: 15,
     },
     legend: {
       color: {
         title: false,
-        position: "top",
+        position: "right",
         rowPadding: 5,
       },
     },
