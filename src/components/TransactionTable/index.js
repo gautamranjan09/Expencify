@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./style.css";
-import { Table, Tag, Space, Button, Tooltip, Select, Radio } from "antd";
+import { Table, Tag, Space, Button, Tooltip, Select, Radio, Popconfirm } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { Option } from "antd/es/mentions";
@@ -13,7 +13,8 @@ import EditTransactionModal from "../Modals/EditTransactionModal ";
 
 const TransactionTable = ({ addTransaction }) => {
   const user = useSelector((state) => state.appSlice.user);
-  const transactions = useSelector((state) => state.appSlice.transactions) || [];
+  const transactions =
+    useSelector((state) => state.appSlice.transactions) || [];
   const [sortKey, setSortKey] = useState("");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -41,7 +42,9 @@ const TransactionTable = ({ addTransaction }) => {
       title: "Tag",
       dataIndex: "tag",
       key: "tag",
-      render: (tag) => <Tag color="geekblue">{(tag || "untagged").toUpperCase()}</Tag>,
+      render: (tag) => (
+        <Tag color="geekblue">{(tag || "untagged").toUpperCase()}</Tag>
+      ),
     },
     {
       title: "Amount (₹)",
@@ -72,13 +75,20 @@ const TransactionTable = ({ addTransaction }) => {
             />
           </Tooltip>
           <Tooltip title="Delete">
-            <Button
-              type="danger"
-              color="danger"
-              shape="circle"
-              icon={<DeleteOutlined />}
-              onClick={() => handleDelete(record.key, record)}
-            />
+            <Popconfirm
+              title="Delete the task"
+              description="Are you sure to delete this task?"
+              onConfirm={() => handleDelete(record.key, record)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button
+                type="danger"
+                color="danger"
+                shape="circle"
+                icon={<DeleteOutlined />}
+              />
+            </Popconfirm>
           </Tooltip>
         </Space>
       ),
@@ -100,36 +110,41 @@ const TransactionTable = ({ addTransaction }) => {
 
   const handleDelete = async (key, transactionDetails) => {
     const { description, type, tag, amount, date } = transactionDetails;
-  
+
     try {
       console.log(`Delete action triggered for key: ${key}`);
       await deleteDoc(doc(db, `users/${user?.uid}/transactions`, key));
       toast.success(`Transaction deleted successfully: 
-        ${type} - ${description} ₹${amount} on ${new Date(date).toLocaleDateString()}`);
+        ${type} - ${description} ₹${amount} on ${new Date(
+        date
+      ).toLocaleDateString()}`);
     } catch (error) {
-      console.error('Error deleting transaction:', error);
+      console.error("Error deleting transaction:", error);
       toast.error(`Failed to delete the transaction: 
-        ${type} - ${description} [${tag}] ₹${amount} on ${new Date(date).toLocaleDateString()}`);
+        ${type} - ${description} [${tag}] ₹${amount} on ${new Date(
+        date
+      ).toLocaleDateString()}`);
     }
   };
 
   const filteredTransactions = transactions.filter((transaction) => {
     if (!transaction) return false;
-    
-    const descriptionMatch = !search || 
-      (transaction.description && 
-       transaction.description.toLowerCase().includes(search.toLowerCase()));
-    
-    const typeMatch = !typeFilter || 
-      (transaction.type && 
-       transaction.type.includes(typeFilter));
-    
+
+    const descriptionMatch =
+      !search ||
+      (transaction.description &&
+        transaction.description.toLowerCase().includes(search.toLowerCase()));
+
+    const typeMatch =
+      !typeFilter ||
+      (transaction.type && transaction.type.includes(typeFilter));
+
     return descriptionMatch && typeMatch;
   });
 
   const sortedTransactions = filteredTransactions.sort((a, b) => {
     if (!a || !b) return 0;
-    
+
     if (sortKey === "date") {
       return new Date(a.date || 0) - new Date(b.date || 0);
     } else if (sortKey === "amount") {
@@ -139,17 +154,17 @@ const TransactionTable = ({ addTransaction }) => {
   });
 
   function exportCSV() {
-    const csvData = transactions.map(t => ({
-      type: t?.type || '',
-      date: t?.date || '',
-      tag: t?.tag || '',
-      description: t?.description || '',
-      amount: t?.amount || 0
+    const csvData = transactions.map((t) => ({
+      type: t?.type || "",
+      date: t?.date || "",
+      tag: t?.tag || "",
+      description: t?.description || "",
+      amount: t?.amount || 0,
     }));
 
     var csv = unparse({
       fields: ["type", "date", "tag", "description", "amount"],
-      data: csvData
+      data: csvData,
     });
     var data = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     var csvURL = window.URL.createObjectURL(data);
@@ -174,20 +189,21 @@ const TransactionTable = ({ addTransaction }) => {
 
       parse(file, {
         header: true,
-        complete: async function(results) {
+        complete: async function (results) {
           try {
             const totalTransactions = results.data.length;
             let successCount = 0;
 
             for (const transaction of results.data) {
               if (!transaction.type || !transaction.amount) continue;
-              
+
               const newTransaction = {
                 ...transaction,
                 amount: parseFloat(transaction.amount) || 0,
-                date: transaction.date || new Date().toISOString().split('T')[0],
-                description: transaction.description || '',
-                tag: transaction.tag || 'others'
+                date:
+                  transaction.date || new Date().toISOString().split("T")[0],
+                description: transaction.description || "",
+                tag: transaction.tag || "others",
               };
 
               await addTransaction(newTransaction, true);
@@ -199,34 +215,32 @@ const TransactionTable = ({ addTransaction }) => {
               render: `Successfully imported ${successCount} of ${totalTransactions} transactions`,
               type: "success",
               isLoading: false,
-              autoClose: 3000
+              autoClose: 3000,
             });
-
           } catch (error) {
             // Update the loading toast with error message
             toast.update(loadingToast, {
               render: "Error importing transactions: " + error.message,
               type: "error",
               isLoading: false,
-              autoClose: 3000
+              autoClose: 3000,
             });
           }
         },
-        error: function(error) {
+        error: function (error) {
           toast.error("Error reading CSV file: " + error.message);
-        }
+        },
       });
-      
+
       // Reset file input
       event.target.value = null;
-      
     } catch (e) {
       toast.error("Error importing file: " + e.message);
     }
   }
 
   return (
-    <div  style={{ width: "95%", padding: "0rem 2rem" }}>
+    <div style={{ width: "95%", padding: "0rem 2rem" }}>
       <div
         style={{
           display: "flex",
@@ -308,10 +322,9 @@ const TransactionTable = ({ addTransaction }) => {
           bordered
           pagination={{ pageSize: 5 }}
           scroll={{ x: "max-content" }}
-
         />
       </div>
-      <EditTransactionModal 
+      <EditTransactionModal
         isVisible={isEditModalVisible}
         onClose={handleModalClose}
         transaction={editingTransaction}
