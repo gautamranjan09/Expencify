@@ -15,6 +15,12 @@
   font-weight: 500;
   font-size: 1.2rem;
   margin: 0;
+  cursor: pointer;
+}
+
+.logo:hover{
+  opacity:0.7;
+  transition: all, 0.3s;
 }
 
 .link{
@@ -24,4 +30,37 @@
 .link:hover{
     opacity:1;
     transition: all, 0.3s;
+}
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profile-pic {
+  border-radius: 50%;
+  height: 2rem;
+  width: 2rem;
+  cursor: pointer;
+  border: 2px solid white;
+  transition: transform 0.2s;
+}
+
+.profile-pic:hover {
+  transform: scale(1.1);
+}
+
+.profile-incomplete {
+  color: #ff4444;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: rgba(255, 68, 68, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
 }

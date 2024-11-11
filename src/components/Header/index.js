@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./style.css";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { Navigate, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -8,27 +8,42 @@ import { signOut } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/appSlice";
 import userImg from "../../assets/user.svg";
+import { doc, getDoc } from "firebase/firestore";
 
 const Header = () => {
   const [user, loading] = useAuthState(auth);
+  const [isProfileComplete, setIsProfileComplete] = useState(true);
+  const [profile, setProfile] = useState({}); 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
-      navigate("/dashboard");
+      checkProfileComplete();
       dispatch(setUser(transformUser(user)));
     }
   }, [user, loading]);
 
-  // Example function to transform the user object
+  const checkProfileComplete = async () => {
+    if (!user?.uid) return;
+    const userRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userRef);
+    
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      // Check if required fields are filled
+      setProfile(data);
+      const isComplete = data.department && data.role && data.phone && data.location && data.photoURL;
+      setIsProfileComplete(isComplete);
+    }
+  };
+
   const transformUser = (user) => {
     return {
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
       photoURL: user.photoURL,
-      // Add other properties as needed, but avoid non-serializable ones like methods or nested objects
     };
   };
 
@@ -36,27 +51,40 @@ const Header = () => {
     try {
       signOut(auth)
         .then(() => {
-          // Sign-out successful.
           toast.success("Logged out successfully!");
           navigate("/");
         })
         .catch((error) => {
-          // An error happened.
           toast.error(error.message);
         });
     } catch (e) {
       toast.error(e.message);
     }
   }
+
+  const handleProfileClick = () => {
+    navigate("/profile");
+  };
+
   return (
     <div className="navbar">
-      <p className="logo">Expencify.</p>
+      <p className="logo" onClick={() => navigate("/dashboard")}>Expencify.</p>
       {user && (
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <img src={user?.photoURL ? user?.photoURL : userImg} style={{borderRadius: "50%", height:"1.5rem", width:"1.5rem"}}/>
-          <p onClick={logoutFnc} className="logo link">
-            Logout
-          </p>
+        <div className="profile-section">
+          {!isProfileComplete && (
+            <span className="profile-incomplete">Profile Incomplete</span>
+          )}
+          <div className="profile-controls">
+            <img 
+              src={profile?.photoURL ? profile?.photoURL : userImg} 
+              className="profile-pic"
+              onClick={handleProfileClick}
+              alt="Profile"
+            />
+            <p onClick={logoutFnc} className="logo link">
+              Logout
+            </p>
+          </div>
         </div>
       )}
     </div>

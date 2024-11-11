@@ -14,6 +14,7 @@ import TransactionTable from "../components/TransactionTable";
 import ChartComponent from "../components/Charts";
 import NoTransactions from "../components/NoTransactions";
 import { DotLoader } from "react-spinners";
+import UserProfile from "../components/UserProfile";
 
 const Dashboard = () => {
   const user = useSelector((state) => state.appSlice.user);

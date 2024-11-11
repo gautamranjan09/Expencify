@@ -118,32 +118,40 @@ const SignupSignIn = () => {
   }
 
   async function createDoc(user) {
-    // Make sure that the doc with the  user id does not exist
-    setLoading(true);
+  setLoading(true);
 
-    if (!user) return;
+  if (!user) return;
+  
+  try {
     const userRef = doc(db, "users", user.uid);
     const userData = await getDoc(userRef);
+
     if (!userData.exists()) {
-      // Create a new document with the user's data
-      try {
-        await setDoc(doc(db, "users", user.uid), {
-          name: user.displayName ? user.displayName : name,
-          email: user.email,
-          photoURL: user.photoURL ? user.photoURL : "",
-          createdAT: new Date(),
-        });
-        setLoading(false);
-        toast.success("Doc created!");
-      } catch (e) {
-        toast.error(e.message);
-        setLoading(false);
-      }
+      await setDoc(userRef, {
+        name: user.displayName ? user.displayName : name,
+        email: user.email,
+        photoURL: user.photoURL ? user.photoURL : "",
+        createdAT: new Date(),
+        department: "",
+        role: "",
+        location: "",
+        phone: "",
+        bio: "",
+        lastUpdated: new Date(),
+        isProfileComplete: false
+      });
+      
+      toast.success("Account created successfully!");
     } else {
-      toast.error("Doc already exists!");
-      setLoading(false);
+      // If doc exists, don't show error, just log in
+      console.log("User document already exists");
     }
+  } catch (e) {
+    toast.error(e.message);
+  } finally {
+    setLoading(false);
   }
+}
 
   async function handleForgotPassword() {
     setLoading(true);
