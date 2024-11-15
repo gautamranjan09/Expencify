@@ -29,12 +29,15 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  const [user] = useAuthState(auth);
+
   return (
     <>
       <ToastContainer />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Signup />} />
+          {/* Redirect to /dashboard if user is logged in and tries to access / */}
+          <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Signup />} />
           <Route
             path="/dashboard"
             element={
@@ -52,6 +55,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* Catch-all route to redirect unrecognized paths to "/" */}
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
     </>
