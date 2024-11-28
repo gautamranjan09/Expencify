@@ -46,17 +46,7 @@ function AddExpenseModal({isExpenseModalVisible, handleExpenseCancel, onFinish})
         >
           <Input type="number" className="custom-input" allowClear style={{ outline: 'none', boxShadow: 'none', padding:"0 0.4rem" }}/>
         </Form.Item>
-        <Form.Item
-          style={{ fontWeight: 400 }}
-          labelCol={{ style: { padding: 0 } }}
-          label="Date"
-          name="date"
-          rules={[
-            { required: true, message: "Please select the expense date!" },
-          ]}
-        >
-          <DatePicker className="custom-input" format="YYYY-MM-DD" style={{ outline: 'none', boxShadow: 'none', padding:"0 0.4rem" }}/>
-        </Form.Item>
+
         <Form.Item
           label="Tag"
           labelCol={{ style: { padding: 0 } }}
@@ -71,6 +61,17 @@ function AddExpenseModal({isExpenseModalVisible, handleExpenseCancel, onFinish})
             <Select.Option value="others">Others</Select.Option>
             {/* Add more tags here */}
           </Select>
+        </Form.Item>
+        <Form.Item
+          style={{ fontWeight: 400 }}
+          labelCol={{ style: { padding: 0 } }}
+          label="Date"
+          name="date"
+          rules={[
+            { required: true, message: "Please select the expense date!" },
+          ]}
+        >
+          <DatePicker className="custom-input" format="YYYY-MM-DD" style={{ outline: 'none', boxShadow: 'none', padding:"0 0.4rem" }}/>
         </Form.Item>
         <Form.Item style={{ marginBottom: 0}}>
           <Button className="btn btn-blue" type="primary" htmlType="submit" style={{ width:"100%"}}>
