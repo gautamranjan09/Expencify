@@ -2,12 +2,7 @@ import React, { useState } from "react";
 import "./style.css";
 import Input from "../Input";
 import Button from "../Button";
-import {
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-} from "firebase/auth";
+import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { toast } from "react-toastify";
 import { auth, db, doc, provider } from "../../firebase";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +14,7 @@ const SignupSignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [loginForm, setLoginForm] = useState(false);
+  const [loginForm, setLoginForm] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
@@ -83,6 +78,25 @@ const SignupSignIn = () => {
     }
   }
 
+  function loginAsGuest() {
+    setLoading(true);
+    signInWithEmailAndPassword(auth, "gautamranjan96@gmail.com", "123456")
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        toast.success("User Logged In!");
+        setLoading(false);
+        navigate("/dashboard");
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        setLoading(false);
+        toast.error(errorMessage);
+      });
+  }
+
   function googleAuth() {
     setLoading(true);
     try {
@@ -118,40 +132,40 @@ const SignupSignIn = () => {
   }
 
   async function createDoc(user) {
-  setLoading(true);
+    setLoading(true);
 
-  if (!user) return;
-  
-  try {
-    const userRef = doc(db, "users", user.uid);
-    const userData = await getDoc(userRef);
+    if (!user) return;
 
-    if (!userData.exists()) {
-      await setDoc(userRef, {
-        name: user.displayName ? user.displayName : name,
-        email: user.email,
-        photoURL: user.photoURL ? user.photoURL : "",
-        createdAT: new Date(),
-        department: "",
-        role: "",
-        location: "",
-        phone: "",
-        bio: "",
-        lastUpdated: new Date(),
-        isProfileComplete: false
-      });
-      
-      toast.success("Account created successfully!");
-    } else {
-      // If doc exists, don't show error, just log in
-      console.log("User document already exists");
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const userData = await getDoc(userRef);
+
+      if (!userData.exists()) {
+        await setDoc(userRef, {
+          name: user.displayName ? user.displayName : name,
+          email: user.email,
+          photoURL: user.photoURL ? user.photoURL : "",
+          createdAT: new Date(),
+          department: "",
+          role: "",
+          location: "",
+          phone: "",
+          bio: "",
+          lastUpdated: new Date(),
+          isProfileComplete: false,
+        });
+
+        toast.success("Account created successfully!");
+      } else {
+        // If doc exists, don't show error, just log in
+        console.log("User document already exists");
+      }
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setLoading(false);
     }
-  } catch (e) {
-    toast.error(e.message);
-  } finally {
-    setLoading(false);
   }
-}
 
   async function handleForgotPassword() {
     setLoading(true);
@@ -175,27 +189,12 @@ const SignupSignIn = () => {
     return (
       <div className="signup-wrapper">
         <h2 className="title">
-          Reset Password -{" "}
-          <span style={{ color: "var(--theme" }}>Expencify.</span>
+          Reset Password - <span style={{ color: "var(--theme" }}>Expencify.</span>
         </h2>
         <form>
-          <Input
-            type="email"
-            label={"Email"}
-            state={email}
-            setState={setEmail}
-            placeholder={"gautamranjan96@gmail.com"}
-          />
-          <Button
-            disabled={loading}
-            text={loading ? "Loading..." : "Send Reset Link"}
-            onClick={handleForgotPassword}
-          />
-          <p
-            className="p-login"
-            style={{ cursor: "pointer" }}
-            onClick={() => setShowForgotPassword(false)}
-          >
+          <Input type="email" label={"Email"} state={email} setState={setEmail} placeholder={"gautamranjan96@gmail.com"} />
+          <Button disabled={loading} text={loading ? "Loading..." : "Send Reset Link"} onClick={handleForgotPassword} />
+          <p className="p-login" style={{ cursor: "pointer" }} onClick={() => setShowForgotPassword(false)}>
             Back to Login
           </p>
         </form>
@@ -211,46 +210,24 @@ const SignupSignIn = () => {
             Login on <span style={{ color: "var(--theme" }}>Expencify.</span>
           </h2>
           <form>
-            <Input
-              type="email"
-              label={"Email"}
-              state={email}
-              setState={setEmail}
-              placeholder={"gautamranjan96@gmail.com"}
-            />
-            <Input
-              type="password"
-              label={"Password"}
-              state={password}
-              setState={setPassword}
-              placeholder={"Example@123"}
-            />
-            <p
-              className="p-login"
-              style={{ cursor: "pointer", margin: "0.5rem 0", textAlign:"left" }}
-              onClick={() => setShowForgotPassword(true)}
-            >
+            <Input type="email" label={"Email"} state={email} setState={setEmail} placeholder={"gautamranjan96@gmail.com"} />
+            <Input type="password" label={"Password"} state={password} setState={setPassword} placeholder={"Example@123"} />
+            <p className="p-login" style={{ cursor: "pointer", margin: "0.5rem 0", textAlign: "left" }} onClick={() => setShowForgotPassword(true)}>
               Forgot Password?
             </p>
-            <Button
-              disabled={loading}
-              text={loading ? "Loading..." : "Login Using Email and Password"}
-              onClick={loginUsingEmail}
-            />
+            <Button disabled={loading} text={loading ? "Loading..." : "Login Using Email and Password"} onClick={loginUsingEmail} />
             <p className="p-login">or</p>
-            <Button
-              onClick={googleAuth}
-              text={loading ? "Loading..." : "Login Using Google"}
-              blue={true}
-            />
-            <p
-              className="p-login"
-              style={{ cursor: "pointer" }}
-              onClick={() => setLoginForm(!loginForm)}
-            >
+            <Button onClick={googleAuth} text={loading ? "Loading..." : "Login Using Google"} blue={true} />
+            <p className="p-login" style={{ cursor: "pointer" }} onClick={() => setLoginForm(!loginForm)}>
               or Don't Have An Account? Click Here
             </p>
           </form>
+          <p className="p-login">or</p>
+          <Button
+            onClick={loginAsGuest}
+            text={loading ? "Loading..." : "Login as Guest"}
+            // blue={true}
+          />
         </div>
       ) : (
         <div className="signup-wrapper">
@@ -258,49 +235,14 @@ const SignupSignIn = () => {
             Sign Up on <span style={{ color: "var(--theme" }}>Expencify.</span>
           </h2>
           <form>
-            <Input
-              label={"Full Name"}
-              state={name}
-              setState={setName}
-              placeholder={"Gautam Ranjan"}
-            />
-            <Input
-              type="email"
-              label={"Email"}
-              state={email}
-              setState={setEmail}
-              placeholder={"gautamranjan96@gmail.com"}
-            />
-            <Input
-              type="password"
-              label={"Password"}
-              state={password}
-              setState={setPassword}
-              placeholder={"Example@123"}
-            />
-            <Input
-              type="password"
-              label={"Confirm Password"}
-              state={confirmPassword}
-              setState={setConfirmPassword}
-              placeholder={"Example@123"}
-            />
-            <Button
-              disabled={loading}
-              text={loading ? "Loading..." : "Signup Using Email and Password"}
-              onClick={signupWithEmail}
-            />
+            <Input label={"Full Name"} state={name} setState={setName} placeholder={"Gautam Ranjan"} />
+            <Input type="email" label={"Email"} state={email} setState={setEmail} placeholder={"gautamranjan96@gmail.com"} />
+            <Input type="password" label={"Password"} state={password} setState={setPassword} placeholder={"Example@123"} />
+            <Input type="password" label={"Confirm Password"} state={confirmPassword} setState={setConfirmPassword} placeholder={"Example@123"} />
+            <Button disabled={loading} text={loading ? "Loading..." : "Signup Using Email and Password"} onClick={signupWithEmail} />
             <p className="p-login">or</p>
-            <Button
-              onClick={googleAuth}
-              text={loading ? "Loading..." : "Signup Using Google"}
-              blue={true}
-            />
-            <p
-              className="p-login"
-              style={{ cursor: "pointer" }}
-              onClick={() => setLoginForm(!loginForm)}
-            >
+            <Button onClick={googleAuth} text={loading ? "Loading..." : "Signup Using Google"} blue={true} />
+            <p className="p-login" style={{ cursor: "pointer" }} onClick={() => setLoginForm(!loginForm)}>
               or Have An Account Already? Click Here
             </p>
           </form>
